@@ -5,6 +5,7 @@ package org.garambrogne.ucengine;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -23,11 +24,17 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
  */
 public class WebClient {
 	private boolean ssl = false;
+	private ExecutorService boss;
+	private ExecutorService workers;
+	private String host;
+	private int port;
 
 	public WebClient(URI uri) {
+		this.boss = Executors.newCachedThreadPool();
+		this.workers = Executors.newCachedThreadPool();
 		String scheme = uri.getScheme() == null ? "http" : uri.getScheme();
-		String host = uri.getHost() == null ? "localhost" : uri.getHost();
-		int port = uri.getPort();
+		host = uri.getHost() == null ? "localhost" : uri.getHost();
+		port = uri.getPort();
 		if (port == -1) {
 			if (scheme.equalsIgnoreCase("http")) {
 				port = 80;
@@ -35,11 +42,14 @@ public class WebClient {
 				port = 443;
 			}
 		}
+	}
+	
+	public void execute(HttpMethod method, URI uri) {
 		// Configure the client.
 		ClientBootstrap bootstrap = new ClientBootstrap(
 				new NioClientSocketChannelFactory(
-						Executors.newCachedThreadPool(),
-						Executors.newCachedThreadPool()));
+						this.boss,
+						this.workers));
 		// Set up the event pipeline factory.
 		bootstrap.setPipelineFactory(new HttpClientPipelineFactory(ssl));
 
@@ -57,7 +67,7 @@ public class WebClient {
 
 		// Prepare the HTTP request.
 		HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-				HttpMethod.GET, uri.toASCIIString());
+				method, uri.toASCIIString());
 		request.setHeader(HttpHeaders.Names.HOST, host);
 		request.setHeader(HttpHeaders.Names.CONNECTION,
 				HttpHeaders.Values.CLOSE);
@@ -71,10 +81,11 @@ public class WebClient {
 
 		// Shut down executor threads to exit.
 		bootstrap.releaseExternalResources();
+		
 	}
 	
-	public void get(String url) {
-		
+	public void get(URI uri) {
+		execute(HttpMethod.GET, uri);
 	}
 
 }
