@@ -3,89 +3,56 @@
  */
 package org.garambrogne.ucengine;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.nio.client.DefaultHttpAsyncClient;
+import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.concurrent.FutureCallback;
+import org.apache.http.nio.reactor.IOReactorException;
 import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 
 /**
  * @author mlecarme
  * 
  */
 public class WebClient {
-	private boolean ssl = false;
-	private ExecutorService boss;
-	private ExecutorService workers;
-	private String host;
-	private int port;
+	private String ucengineUrl;
+	private HttpAsyncClient httpclient;
 
-	public WebClient(URI uri) {
-		this.boss = Executors.newCachedThreadPool();
-		this.workers = Executors.newCachedThreadPool();
-		String scheme = uri.getScheme() == null ? "http" : uri.getScheme();
-		host = uri.getHost() == null ? "localhost" : uri.getHost();
-		port = uri.getPort();
-		if (port == -1) {
-			if (scheme.equalsIgnoreCase("http")) {
-				port = 80;
-			} else if (scheme.equalsIgnoreCase("https")) {
-				port = 443;
-			}
-		}
+	public WebClient(String url) throws IOReactorException {
+		this.ucengineUrl = url;
+		this.httpclient = new DefaultHttpAsyncClient();
+		this.httpclient.start();
 	}
-	
-	public void execute(HttpMethod method, URI uri) {
-		// Configure the client.
-		ClientBootstrap bootstrap = new ClientBootstrap(
-				new NioClientSocketChannelFactory(
-						this.boss,
-						this.workers));
-		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new HttpClientPipelineFactory(ssl));
 
-		// Start the connection attempt.
-		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host,
-				port));
-
-		// Wait until the connection attempt succeeds or fails.
-		Channel channel = future.awaitUninterruptibly().getChannel();
-		if (!future.isSuccess()) {
-			future.getCause().printStackTrace();
-			bootstrap.releaseExternalResources();
-			return;
-		}
-
-		// Prepare the HTTP request.
-		HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-				method, uri.toASCIIString());
-		request.setHeader(HttpHeaders.Names.HOST, host);
-		request.setHeader(HttpHeaders.Names.CONNECTION,
-				HttpHeaders.Values.CLOSE);
-		request.setHeader(HttpHeaders.Names.ACCEPT_ENCODING,
-				HttpHeaders.Values.GZIP);
-		// Send the HTTP request.
-		channel.write(request);
-
-		// Wait for the server to close the connection.
-		channel.getCloseFuture().awaitUninterruptibly();
-
-		// Shut down executor threads to exit.
-		bootstrap.releaseExternalResources();
-		
+	public void execute(HttpMethod method, String path)
+			throws InterruptedException {
+		execute(method, path, null);
 	}
-	
-	public void get(URI uri) {
-		execute(HttpMethod.GET, uri);
+
+	public void execute(HttpMethod method, final String path,
+			Map<String, String> body) throws InterruptedException {
+		StringBuilder url = new StringBuilder(this.ucengineUrl);
+		url.append("/api/0.4").append(path);
+		httpclient.execute(new HttpGet(url.toString()),
+				new FutureCallback<HttpResponse>() {
+					public void completed(final HttpResponse response) {
+						System.out.println(path + "->"
+								+ response.getStatusLine());
+					}
+					public void failed(final Exception ex) {
+						ex.printStackTrace();
+					}
+					public void cancelled() {
+					}
+
+				});
+	}
+
+	public void shutdown() throws InterruptedException {
+		httpclient.shutdown();
 	}
 
 }
