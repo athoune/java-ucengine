@@ -21,12 +21,12 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
  * @author mlecarme
  * 
  */
-public class WebClient {
+public class UCEngine {
 	private String ucengineUrl;
 	private HttpAsyncClient httpclient;
 	public static final String VERSION = "/api/0.5";
 
-	public WebClient(String url) throws IOReactorException {
+	public UCEngine(String url) throws IOReactorException {
 		this.ucengineUrl = url;
 		this.httpclient = new DefaultHttpAsyncClient();
 		this.httpclient.start();

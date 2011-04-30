@@ -20,7 +20,7 @@ public class WebClientTest {
 
 	@Test
 	public void time() throws URISyntaxException, IOReactorException, MalformedURLException, InterruptedException {
-		WebClient client = new WebClient("http://demo.ucengine.org");
+		UCEngine client = new UCEngine("http://demo.ucengine.org");
 		final CountDownLatch latch = new CountDownLatch(2);
 		client.execute(null, "/time", new FutureCallback<Response>() {
 			public void failed(Exception e) {
