@@ -21,6 +21,7 @@ import org.apache.http.impl.nio.client.DefaultHttpAsyncClient;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.concurrent.FutureCallback;
 import org.apache.http.nio.reactor.IOReactorException;
+import org.apache.http.params.HttpParams;
 import org.apache.tapestry5.json.JSONObject;
 
 /**
@@ -40,14 +41,9 @@ public class UCEngine {
 		this.asyncHttpclient.start();
 	}
 
-	public void executeAsync(HttpMethod method, String path, FutureCallback<Response> future)
-			throws InterruptedException {
-		executeAsync(method, path, future, null);
-	}
-
 	public void executeAsync(HttpMethod method, final String path,
-			final FutureCallback<Response> future, Map<String, Object> body) throws InterruptedException {
-		asyncHttpclient.execute(buildRequest(method, path),
+			final FutureCallback<Response> future, HttpParams params, Map<String, Object> body) throws InterruptedException {
+		asyncHttpclient.execute(buildRequest(method, path, params),
 				new FutureCallback<HttpResponse>() {
 					public void completed(final HttpResponse response) {
 						try {
@@ -65,16 +61,20 @@ public class UCEngine {
 				});
 	}
 	
-	private HttpRequestBase buildRequest(HttpMethod method, String path) {
+	protected HttpRequestBase buildRequest(HttpMethod method, String path, HttpParams params) {
 		StringBuilder url = new StringBuilder(this.ucengineUrl);
 		url.append(VERSION).append(path);
+		HttpRequestBase base = null;
 		if(method.equals(HttpMethod.GET)) {
-			return new HttpGet(url.toString());
+			base = new HttpGet(url.toString());
 		}
 		if(method.equals(HttpMethod.POST)) {
-			return new HttpPost(url.toString());
+			base = new HttpPost(url.toString());
 		}
-		return null;
+		if(params != null) {
+			base.setParams(params);
+		}
+		return base;
 	}
 	
 	private Response buildResponse(HttpResponse response) throws IOException {
@@ -84,12 +84,16 @@ public class UCEngine {
 		return new Response(response.getStatusLine().getStatusCode(), resp);
 	}
 	
-	public Response execute(HttpMethod method, String path, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
-		HttpRequestBase request = buildRequest(method, path);
+	public Response execute(HttpMethod method, String path, HttpParams params, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
+		HttpRequestBase request = buildRequest(method, path, params);
 		if(formparams != null) {
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
 			((HttpPost)request).setEntity(entity);
 		}
+		return execute(request);
+	}
+	
+	public Response execute(HttpRequestBase request) throws ClientProtocolException, IOException {
 		HttpResponse response = httpclient.execute(request);
 		return buildResponse(response);
 	}
