@@ -22,8 +22,8 @@ public class WebClientTest {
 		WebClient client = new WebClient("http://demo.ucengine.org");
 		final CountDownLatch latch = new CountDownLatch(2);
 		client.execute(null, "/time", new FutureCallback<Response>() {
-			public void failed(Exception arg0) {
-				System.out.println(arg0);
+			public void failed(Exception e) {
+				e.printStackTrace();
 				latch.countDown();
 			}
 			public void completed(Response response) {
@@ -35,8 +35,8 @@ public class WebClientTest {
 			}
 		});
 		client.execute(null, "/infos", new FutureCallback<Response>() {
-			public void failed(Exception arg0) {
-				System.out.println(arg0);
+			public void failed(Exception e) {
+				e.printStackTrace();
 				latch.countDown();
 			}
 			public void completed(Response response) {

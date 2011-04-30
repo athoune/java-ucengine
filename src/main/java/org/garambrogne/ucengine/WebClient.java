@@ -24,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 public class WebClient {
 	private String ucengineUrl;
 	private HttpAsyncClient httpclient;
+	public static final String VERSION = "/api/0.5";
 
 	public WebClient(String url) throws IOReactorException {
 		this.ucengineUrl = url;
@@ -39,7 +40,7 @@ public class WebClient {
 	public void execute(HttpMethod method, final String path,
 			final FutureCallback<Response> future, Map<String, Object> body) throws InterruptedException {
 		StringBuilder url = new StringBuilder(this.ucengineUrl);
-		url.append("/api/0.5").append(path);
+		url.append(VERSION).append(path);
 		httpclient.execute(new HttpGet(url.toString()),
 				new FutureCallback<HttpResponse>() {
 					public void completed(final HttpResponse response) {
@@ -47,23 +48,21 @@ public class WebClient {
 						try {
 							response.getEntity().writeTo(buffer);
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							future.failed(e);
 						}
 						try {
 							JSONObject resp = new JSONObject(buffer.toString("UTF8"));
 							future.completed(new Response(response.getStatusLine().getStatusCode(), resp));
 						} catch (UnsupportedEncodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							future.failed(e);
 						}
 					}
 					public void failed(final Exception ex) {
-						ex.printStackTrace();
+						future.failed(ex);
 					}
 					public void cancelled() {
+						future.cancelled();
 					}
-
 				});
 	}
 
