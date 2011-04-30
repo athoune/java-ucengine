@@ -22,7 +22,7 @@ public class WebClientTest {
 	public void time() throws URISyntaxException, IOReactorException, MalformedURLException, InterruptedException {
 		UCEngine client = new UCEngine("http://demo.ucengine.org");
 		final CountDownLatch latch = new CountDownLatch(2);
-		client.execute(null, "/time", new FutureCallback<Response>() {
+		client.executeAsync(HttpMethod.GET, "/time", new FutureCallback<Response>() {
 			public void failed(Exception e) {
 				e.printStackTrace();
 				assertTrue(false);
@@ -39,7 +39,7 @@ public class WebClientTest {
 				latch.countDown();
 			}
 		});
-		client.execute(null, "/infos", new FutureCallback<Response>() {
+		client.executeAsync(HttpMethod.GET, "/infos", new FutureCallback<Response>() {
 			public void failed(Exception e) {
 				assertTrue(false);
 				e.printStackTrace();
