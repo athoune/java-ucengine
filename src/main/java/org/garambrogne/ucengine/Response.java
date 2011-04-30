@@ -33,4 +33,7 @@ public class Response {
 	public JSONObject getValues() {
 		return values;
 	}
+	public boolean isError() {
+		return values.has("error");
+	}
 }
