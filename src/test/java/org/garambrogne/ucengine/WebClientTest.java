@@ -12,7 +12,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.nio.concurrent.FutureCallback;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.garambrogne.ucengine.event.Event;
-import org.garambrogne.ucengine.event.FutureEvent;
+import org.garambrogne.ucengine.event.EventHandler;
 import org.garambrogne.ucengine.rpc.HttpMethod;
 import org.garambrogne.ucengine.rpc.Response;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class WebClientTest {
 	public void demo() throws ClientProtocolException, IOException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
 		final User demo = new User("victor.goya@af83.com");
-		demo.register(new FutureEvent() {
+		demo.register(new EventHandler() {
 			
 			public String name() {
 				return "internal.presence.add";

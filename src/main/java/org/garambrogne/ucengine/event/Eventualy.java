@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.tapestry5.json.JSONObject;
@@ -24,9 +26,10 @@ public abstract class Eventualy {
 	protected UCEngine engine;
 	private Thread eventThread;
 	private boolean running = true;
-	private Map<String, List<FutureEvent>> events = new HashMap<String, List<FutureEvent>>();
+	private Map<String, List<EventHandler>> events = new HashMap<String, List<EventHandler>>();
+	private Log log = LogFactory.getLog(this.getClass());
 	
-	public void startLoop(final HttpRequestBase request) {
+	protected void startLoop(final HttpRequestBase request) {
 		eventThread = new Thread(new Runnable() {
 			public void run() {
 				int start = 0;
@@ -34,7 +37,6 @@ public abstract class Eventualy {
 					Response response = null;
 					try {
 						request.getParams().setIntParameter("start", start);
-						System.out.println(request.getRequestLine());
 						response = engine.execute(request);
 					} catch (ClientProtocolException e) {
 						// TODO Auto-generated catch block
@@ -43,11 +45,9 @@ public abstract class Eventualy {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					System.out.println(response.getStatus());
 					if(response != null){// && response.getStatus() == 200) {
 						for (Object event : response.getValues().getJSONArray("result")) {
 							JSONObject jevent = (JSONObject)event;
-							System.out.println(jevent);
 							start = jevent.getInt("datetime") + 1;
 							trigger(new Event(jevent));
 						}
@@ -59,18 +59,31 @@ public abstract class Eventualy {
 		eventThread.run();
 	}
 	
-	private void trigger(Event event) {
+	protected void trigger(Event event) {
+		log.debug(event);
+		class Handler implements Runnable {
+			private EventHandler handler;
+			private Event event;
+			public Handler(EventHandler handler, Event event) {
+				this.handler = handler;
+				this.event = event;
+			}
+
+			public void run() {
+				handler.handle(event);
+			}
+		}
 		if(events.containsKey(event.getType())) {
-			for (FutureEvent future : events.get(event.getType())) {
-				future.handle(event);
+			for (EventHandler future : events.get(event.getType())) {
+				engine.getPool().execute(new Handler(future, event));
 			}
 		}
 	}
 	
-	public void register(FutureEvent futureEvent) {
+	public void register(EventHandler futureEvent) {
 		String name = futureEvent.name();
 		if(! events.containsKey(name)) {
-			events.put(name, new ArrayList<FutureEvent>());
+			events.put(name, new ArrayList<EventHandler>());
 		}
 		events.get(name).add(futureEvent);
 	}

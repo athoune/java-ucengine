@@ -6,6 +6,8 @@ package org.garambrogne.ucengine;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -35,12 +37,14 @@ public class UCEngine {
 	private HttpAsyncClient asyncHttpclient;
 	private HttpClient httpclient;
 	public static final String VERSION = "/api/0.5";
+	private final ExecutorService pool;
 
 	public UCEngine(String url) throws IOReactorException {
 		this.ucengineUrl = url;
 		this.httpclient = new DefaultHttpClient();
 		this.asyncHttpclient= new DefaultHttpAsyncClient();
 		this.asyncHttpclient.start();
+		this.pool = Executors.newFixedThreadPool(15);
 	}
 
 	public void executeAsync(HttpMethod method, final String path,
@@ -105,6 +109,13 @@ public class UCEngine {
 
 	public void shutdown() throws InterruptedException {
 		asyncHttpclient.shutdown();
+	}
+
+	/**
+	 * @return the pool
+	 */
+	public ExecutorService getPool() {
+		return pool;
 	}
 
 }
