@@ -16,6 +16,7 @@ import org.apache.tapestry5.json.JSONObject;
 /**
  * @author mlecarme
  *
+ * An event listener
  */
 public abstract class Eventualy {
 	protected UCEngine engine;

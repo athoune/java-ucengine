@@ -7,6 +7,8 @@ import org.apache.tapestry5.json.JSONObject;
 
 /**
  * @author mlecarme
+ * 
+ * RPC response
  *
  */
 public class Response {
