@@ -23,6 +23,8 @@ import org.apache.http.nio.concurrent.FutureCallback;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.HttpParams;
 import org.apache.tapestry5.json.JSONObject;
+import org.garambrogne.ucengine.rpc.HttpMethod;
+import org.garambrogne.ucengine.rpc.Response;
 
 /**
  * @author mlecarme

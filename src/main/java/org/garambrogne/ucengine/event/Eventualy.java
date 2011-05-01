@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.garambrogne.ucengine;
+package org.garambrogne.ucengine.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +12,8 @@ import java.util.Map;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.tapestry5.json.JSONObject;
+import org.garambrogne.ucengine.UCEngine;
+import org.garambrogne.ucengine.rpc.Response;
 
 /**
  * @author mlecarme

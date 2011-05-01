@@ -11,6 +11,10 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.nio.concurrent.FutureCallback;
 import org.apache.http.nio.reactor.IOReactorException;
+import org.garambrogne.ucengine.event.Event;
+import org.garambrogne.ucengine.event.FutureEvent;
+import org.garambrogne.ucengine.rpc.HttpMethod;
+import org.garambrogne.ucengine.rpc.Response;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

@@ -1,7 +1,8 @@
 /**
  * 
  */
-package org.garambrogne.ucengine;
+package org.garambrogne.ucengine.event;
+
 
 /**
  * @author mlecarme

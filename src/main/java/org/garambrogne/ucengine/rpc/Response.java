@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.garambrogne.ucengine;
+package org.garambrogne.ucengine.rpc;
 
 import org.apache.tapestry5.json.JSONObject;
 

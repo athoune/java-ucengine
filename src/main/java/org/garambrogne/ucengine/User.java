@@ -11,6 +11,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
+import org.garambrogne.ucengine.event.Eventualy;
+import org.garambrogne.ucengine.rpc.HttpMethod;
+import org.garambrogne.ucengine.rpc.Response;
 
 
 /**

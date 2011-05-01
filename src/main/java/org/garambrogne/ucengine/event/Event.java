@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.garambrogne.ucengine;
+package org.garambrogne.ucengine.event;
 
 import java.util.HashMap;
 import java.util.Map;
