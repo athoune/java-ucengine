@@ -24,13 +24,13 @@ public abstract class Eventualy {
 	
 	public void startLoop(final HttpRequestBase request) {
 		eventThread = new Thread(new Runnable() {
-			
 			public void run() {
 				int start = 0;
 				while(true) {
 					Response response = null;
 					try {
 						request.getParams().setIntParameter("start", start);
+						System.out.println(request.getRequestLine());
 						response = engine.execute(request);
 					} catch (ClientProtocolException e) {
 						// TODO Auto-generated catch block
@@ -39,7 +39,8 @@ public abstract class Eventualy {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					if(response != null && response.getStatus() == 200) {
+					System.out.println(response.getStatus());
+					if(response != null){// && response.getStatus() == 200) {
 						for (Object event : response.getValues().getJSONArray("result")) {
 							JSONObject jevent = (JSONObject)event;
 							System.out.println(jevent);

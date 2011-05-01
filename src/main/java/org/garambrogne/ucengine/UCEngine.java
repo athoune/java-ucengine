@@ -6,7 +6,6 @@ package org.garambrogne.ucengine;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -16,6 +15,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.nio.client.DefaultHttpAsyncClient;
 import org.apache.http.nio.client.HttpAsyncClient;
@@ -42,8 +42,8 @@ public class UCEngine {
 	}
 
 	public void executeAsync(HttpMethod method, final String path,
-			final FutureCallback<Response> future, HttpParams params, Map<String, Object> body) throws InterruptedException {
-		asyncHttpclient.execute(buildRequest(method, path, params),
+			final FutureCallback<Response> future, List<NameValuePair> qparams, List<NameValuePair> body) throws InterruptedException {
+		asyncHttpclient.execute(buildRequest(method, path, qparams, null),
 				new FutureCallback<HttpResponse>() {
 					public void completed(final HttpResponse response) {
 						try {
@@ -61,9 +61,11 @@ public class UCEngine {
 				});
 	}
 	
-	protected HttpRequestBase buildRequest(HttpMethod method, String path, HttpParams params) {
-		StringBuilder url = new StringBuilder(this.ucengineUrl);
-		url.append(VERSION).append(path);
+	protected HttpRequestBase buildRequest(HttpMethod method, String path, List<NameValuePair> qparams, HttpParams params) {
+		StringBuilder url = new StringBuilder(this.ucengineUrl).append(VERSION).append(path);
+		if(qparams != null) {
+			url.append('?').append(URLEncodedUtils.format(qparams, "UTF-8"));
+		}
 		HttpRequestBase base = null;
 		if(method.equals(HttpMethod.GET)) {
 			base = new HttpGet(url.toString());
@@ -77,15 +79,16 @@ public class UCEngine {
 		return base;
 	}
 	
-	private Response buildResponse(HttpResponse response) throws IOException {
+	private static Response buildResponse(HttpResponse response) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(new Long(response.getEntity().getContentLength()).intValue());
 		response.getEntity().writeTo(buffer);
+		System.out.println(buffer.toString("UTF8"));
 		JSONObject resp = new JSONObject(buffer.toString("UTF8"));
 		return new Response(response.getStatusLine().getStatusCode(), resp);
 	}
 	
-	public Response execute(HttpMethod method, String path, HttpParams params, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
-		HttpRequestBase request = buildRequest(method, path, params);
+	public Response execute(HttpMethod method, String path, List<NameValuePair> qparams, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
+		HttpRequestBase request = buildRequest(method, path, qparams, null);
 		if(formparams != null) {
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
 			((HttpPost)request).setEntity(entity);

@@ -11,8 +11,6 @@ import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 import org.apache.tapestry5.json.JSONObject;
 
 
@@ -40,11 +38,11 @@ public class User extends Eventualy {
 		JSONObject result = response.getValues().getJSONObject("result");
 		this.uid = result.getString("uid");
 		this.sid = result.getString("sid");
-		HttpParams params = new BasicHttpParams();
-		params.setParameter("uid", this.uid);
-		params.setParameter("sid", this.sid);
-		params.setParameter("_async", "lp");
-		this.startLoop(engine.buildRequest(HttpMethod.GET, "/presence", params));
+		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+		qparams.add(new BasicNameValuePair("uid", this.uid));
+		qparams.add(new BasicNameValuePair("sid", this.sid));
+		qparams.add(new BasicNameValuePair("_async", "lp"));
+		this.startLoop(engine.buildRequest(HttpMethod.GET, "/event", qparams, null));
 	}
 	
 	public Map<String, Object> infos() {
