@@ -20,13 +20,14 @@ import org.apache.tapestry5.json.JSONObject;
 public abstract class Eventualy {
 	protected UCEngine engine;
 	private Thread eventThread;
+	private boolean running = true;
 	private Map<String, List<FutureEvent>> events = new HashMap<String, List<FutureEvent>>();
 	
 	public void startLoop(final HttpRequestBase request) {
 		eventThread = new Thread(new Runnable() {
 			public void run() {
 				int start = 0;
-				while(true) {
+				while(running) {
 					Response response = null;
 					try {
 						request.getParams().setIntParameter("start", start);
@@ -45,6 +46,7 @@ public abstract class Eventualy {
 							JSONObject jevent = (JSONObject)event;
 							System.out.println(jevent);
 							start = jevent.getInt("datetime") + 1;
+							trigger(new Event(jevent));
 						}
 					}
 					
@@ -54,12 +56,25 @@ public abstract class Eventualy {
 		eventThread.run();
 	}
 	
+	private void trigger(Event event) {
+		if(events.containsKey(event.getType())) {
+			for (FutureEvent future : events.get(event.getType())) {
+				future.handle(event);
+			}
+		}
+	}
+	
 	public void register(FutureEvent futureEvent) {
 		String name = futureEvent.name();
 		if(! events.containsKey(name)) {
 			events.put(name, new ArrayList<FutureEvent>());
 		}
 		events.get(name).add(futureEvent);
+	}
+	
+	public void shutdown() throws InterruptedException {
+		running = false;
+		eventThread.join();
 	}
 
 }

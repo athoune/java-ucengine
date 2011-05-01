@@ -65,7 +65,24 @@ public class WebClientTest {
 	@Test
 	public void demo() throws ClientProtocolException, IOException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
-		User demo = new User("victor.goya@af83.com");
+		final User demo = new User("victor.goya@af83.com");
+		demo.register(new FutureEvent() {
+			
+			public String name() {
+				return "internal.presence.add";
+			}
+			
+			public void handle(Event event) {
+				try {
+					System.out.println("I'll stop");
+					System.out.println(event.getRaw());
+					demo.shutdown();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 		demo.presence(engine, "pwd");	
 	}
 }
