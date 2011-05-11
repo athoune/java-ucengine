@@ -2,14 +2,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.garambrogne</groupId>
+		<artifactId>ucengine</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
 	<groupId>org.garambrogne</groupId>
-	<artifactId>ucengine</artifactId>
+	<artifactId>ucengine-elasticsearch</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>ucengine</name>
-	<url>https://github.com/athoune/java-ucengine</url>
-	
 	<developers>
 		<developer>
 			<id>athoune</id>
@@ -27,8 +30,8 @@
 
 	<repositories>
 		<repository>
-			<id>repository.jboss.org</id>
-			<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
+			<id>oss.sonatype.org</id>
+			<url>http://oss.sonatype.org/content/repositories/releases/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -37,26 +40,21 @@
 
 	<dependencies>
 		<dependency>
+		      <groupId>org.garambrogne</groupId>
+		      <artifactId>ucengine-core</artifactId>
+		      <version>0.0.1-SNAPSHOT</version>
+		    </dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpasyncclient</artifactId>
-			<version>4.0-alpha1</version>
+			<groupId>org.elasticsearch</groupId>
+			<artifactId>elasticsearch</artifactId>
+			<version>0.16.0</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tapestry</groupId>
-			<artifactId>tapestry-json</artifactId>
-			<version>5.2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
 </project>
