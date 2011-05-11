@@ -24,7 +24,6 @@ import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.concurrent.FutureCallback;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.HttpParams;
-import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.rpc.HttpMethod;
 import org.garambrogne.ucengine.rpc.Response;
 
@@ -88,9 +87,7 @@ public class UCEngine {
 	private static Response buildResponse(HttpResponse response) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(new Long(response.getEntity().getContentLength()).intValue());
 		response.getEntity().writeTo(buffer);
-		System.out.println(buffer.toString("UTF8"));
-		JSONObject resp = new JSONObject(buffer.toString("UTF8"));
-		return new Response(response.getStatusLine().getStatusCode(), resp);
+		return new Response(response.getStatusLine().getStatusCode(), buffer.toString("UTF8"));
 	}
 	
 	public Response execute(HttpMethod method, String path, List<NameValuePair> qparams, List<NameValuePair> formparams) throws ClientProtocolException, IOException {

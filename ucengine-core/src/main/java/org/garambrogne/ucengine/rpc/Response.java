@@ -13,15 +13,16 @@ import org.apache.tapestry5.json.JSONObject;
  */
 public class Response {
 	private int status;
-	private JSONObject values;
+	private JSONObject values = null;
+	private String raw;
 	/**
 	 * @param status
 	 * @param values
 	 */
-	public Response(int status, JSONObject values) {
+	public Response(int status, String raw) {
 		super();
 		this.status = status;
-		this.values = values;
+		this.raw = raw;
 	}
 	/**
 	 * @return the status
@@ -33,9 +34,12 @@ public class Response {
 	 * @return the values
 	 */
 	public JSONObject getValues() {
+		if(values == null) {
+			values = new JSONObject(raw);
+		}
 		return values;
 	}
 	public boolean isError() {
-		return values.has("error");
+		return getValues().has("error");
 	}
 }
