@@ -29,6 +29,14 @@ public class User extends Eventualy {
 		super();
 		this.name = name;
 	}
+	
+	/**
+	 * Connecting and starting event loop
+	 * @param engine
+	 * @param credential
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
 	public void presence(UCEngine engine, String credential) throws ClientProtocolException, IOException {
 		presenceWithoutEvents(engine, credential);
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
@@ -38,6 +46,13 @@ public class User extends Eventualy {
 		this.startLoop(engine.buildRequest(HttpMethod.GET, "/event", qparams, null));
 	}
 	
+	/**
+	 * Connecting without event loop
+	 * @param engine
+	 * @param credential
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
 	public void presenceWithoutEvents(UCEngine engine, String credential) throws ClientProtocolException, IOException {
 		this.engine = engine;
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
