@@ -87,7 +87,7 @@ public class UCEngine {
 	private static Response buildResponse(HttpResponse response) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(new Long(response.getEntity().getContentLength()).intValue());
 		response.getEntity().writeTo(buffer);
-		return new Response(response.getStatusLine().getStatusCode(), buffer.toString("UTF8"));
+		return new Response(response.getStatusLine().getStatusCode(), buffer.toByteArray());
 	}
 	
 	public Response execute(HttpMethod method, String path, List<NameValuePair> qparams, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
