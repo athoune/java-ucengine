@@ -21,20 +21,11 @@ public class Brick {
 		node = NodeBuilder.nodeBuilder().node();
 		node.start();
 		final Client client = node.client();
-		user.register(new EventHandler() {
-			
-			public String name() {
-				// TODO Auto-generated method stub
-				return "internal.presence.add";
-			}
-			
+		user.register("internal.presence.add", new EventHandler() {
 			public void handle(Event event) {
 				client.prepareIndex("ucengine", "internal.presence.add").setSource(event.getRaw().toString()).execute();
 			}
 		});
-
 	}
-	
-	
 
 }

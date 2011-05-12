@@ -80,14 +80,19 @@ public abstract class Eventualy {
 		}
 	}
 	
-	public void register(EventHandler futureEvent) {
-		String name = futureEvent.name();
+	public void register(String name, EventHandler futureEvent) {
 		if(! events.containsKey(name)) {
 			events.put(name, new ArrayList<EventHandler>());
 		}
 		events.get(name).add(futureEvent);
 	}
-	
+
+	public void register(String[] names, EventHandler futureEvent) {
+		for(int a=0; a < names.length; a++) {
+			register(names[a], futureEvent);
+		}
+	}
+
 	public void shutdown() throws InterruptedException {
 		running = false;
 		eventThread.join();

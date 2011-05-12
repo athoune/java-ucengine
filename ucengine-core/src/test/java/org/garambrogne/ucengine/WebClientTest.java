@@ -70,12 +70,7 @@ public class WebClientTest {
 	public void demo() throws ClientProtocolException, IOException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
 		final User demo = new User("victor.goya@af83.com");
-		demo.register(new EventHandler() {
-			
-			public String name() {
-				return "internal.presence.add";
-			}
-			
+		demo.register("internal.presence.add", new EventHandler() {
 			public void handle(Event event) {
 				try {
 					System.out.println("I'll stop");
