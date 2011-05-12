@@ -23,13 +23,11 @@ public class Brick {
 		final Client client = node.client();
 		user.register(new EventHandler() {
 			
-			@Override
 			public String name() {
 				// TODO Auto-generated method stub
 				return "internal.presence.add";
 			}
 			
-			@Override
 			public void handle(Event event) {
 				client.prepareIndex("ucengine", "internal.presence.add").setSource(event.getRaw().toString()).execute();
 			}
