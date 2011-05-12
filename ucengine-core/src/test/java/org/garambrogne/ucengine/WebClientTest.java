@@ -82,14 +82,14 @@ public class WebClientTest {
 				}
 			}
 		});
-		demo.presence(engine, "pwd");	
+		demo.connect(engine, "pwd").presence();	
 	}
 	
 	@Test
 	public void infos() throws ClientProtocolException, IOException, InterruptedException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
 		final User demo = new User("victor.goya@af83.com");
-		demo.presenceWithoutEvents(engine, "pwd");
+		demo.connect(engine, "pwd");
 		System.out.println(demo.infos());
 	}
 }

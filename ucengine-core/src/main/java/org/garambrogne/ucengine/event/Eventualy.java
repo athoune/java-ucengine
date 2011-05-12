@@ -9,12 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.tapestry5.json.JSONObject;
-import org.garambrogne.ucengine.UCEngine;
 import org.garambrogne.ucengine.rpc.Response;
 
 /**
@@ -22,12 +19,10 @@ import org.garambrogne.ucengine.rpc.Response;
  *
  * An event listener
  */
-public abstract class Eventualy {
-	protected UCEngine engine;
+public abstract class Eventualy extends Connectable{
 	private Thread eventThread;
 	private boolean running = true;
 	private Map<String, List<EventHandler>> events = new HashMap<String, List<EventHandler>>();
-	private Log log = LogFactory.getLog(this.getClass());
 	
 	protected void startLoop(final HttpRequestBase request) {
 		eventThread = new Thread(new Runnable() {

@@ -13,50 +13,35 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.event.Eventualy;
 import org.garambrogne.ucengine.rpc.HttpMethod;
-import org.garambrogne.ucengine.rpc.Response;
-
 
 /**
  * @author mlecarme
- *
+ * Distant plugin
  */
-public class User extends Eventualy {
-	private String name, uid, sid;
-	/**
-	 * @param uid
-	 */
-	public User(String name) {
-		super();
-		this.name = name;
-	}
+public abstract class Brick extends Eventualy {
 	
-	public User connect(UCEngine engine, String credential) throws ClientProtocolException, IOException {
+	private String uid;
+
+	public Brick connect(UCEngine engine, String uid, String credential) throws ClientProtocolException, IOException {
 		this.engine = engine;
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-		formparams.add(new BasicNameValuePair("name", this.name));
+		formparams.add(new BasicNameValuePair("name", uid));
 		formparams.add(new BasicNameValuePair("credential", credential));
-		formparams.add(new BasicNameValuePair("metadata[nickname]", this.name));
 		JSONObject result = super.rawconnect(formparams);
 		this.uid = result.getString("uid");
 		this.sid = result.getString("sid");
-
 		return this;
 	}
 	
-	public void presence()  {
+	public void suscribe(String location, int start) {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		qparams.add(new BasicNameValuePair("uid", this.uid));
 		qparams.add(new BasicNameValuePair("sid", this.sid));
 		qparams.add(new BasicNameValuePair("_async", "lp"));
 		this.startLoop(engine.buildRequest(HttpMethod.GET, "/event", qparams, null));
 	}
-		
-	public JSONObject infos() throws ClientProtocolException, IOException {
-		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		qparams.add(new BasicNameValuePair("uid", this.uid));
-		qparams.add(new BasicNameValuePair("sid", this.sid));
-		Response response = engine.execute(HttpMethod.GET, "/infos", qparams, null);
-		return response.getValues().getJSONObject("result");
+
+	public void suscribe(String location) {
+		suscribe(location, 0);
 	}
-	
 }
