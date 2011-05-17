@@ -29,13 +29,13 @@
 	</properties>
 
 	<repositories>
-		<repository>
+		<!-- <repository>
 			<id>repository.jboss.org</id>
 			<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</repository>
+		</repository> -->
 	</repositories>
 
 	<dependencies>
@@ -43,23 +43,28 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
+			<type>jar</type>
 			<scope>test</scope>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpasyncclient</artifactId>
-			<version>4.0-alpha1</version>
-			<scope>compile</scope>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tapestry</groupId>
 			<artifactId>tapestry-json</artifactId>
 			<version>5.2.5</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 	</dependencies>
 	<groupId>org.garambrogne</groupId>
