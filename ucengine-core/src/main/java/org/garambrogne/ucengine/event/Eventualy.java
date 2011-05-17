@@ -3,15 +3,15 @@
  */
 package org.garambrogne.ucengine.event;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.tapestry5.json.JSONObject;
+import org.garambrogne.ucengine.HttpException;
+import org.garambrogne.ucengine.UceException;
 import org.garambrogne.ucengine.rpc.Response;
 
 /**
@@ -33,10 +33,10 @@ public abstract class Eventualy extends Connectable{
 					try {
 						request.getParams().setIntParameter("start", start);
 						response = engine.execute(request);
-					} catch (ClientProtocolException e) {
+					} catch (UceException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (IOException e) {
+					} catch (HttpException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}

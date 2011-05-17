@@ -5,6 +5,13 @@ package org.garambrogne.ucengine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,14 +24,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.nio.client.DefaultHttpAsyncClient;
-import org.apache.http.nio.client.HttpAsyncClient;
-import org.apache.http.nio.concurrent.FutureCallback;
-import org.apache.http.nio.reactor.IOReactorException;
-import org.apache.http.params.HttpParams;
-import org.garambrogne.ucengine.rpc.HttpMethod;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.rpc.Response;
 
 /**
@@ -32,80 +36,93 @@ import org.garambrogne.ucengine.rpc.Response;
  * 
  */
 public class UCEngine {
-	private String ucengineUrl;
-	private HttpAsyncClient asyncHttpclient;
+	private String host, protocol;
+	private int port;
 	private HttpClient httpclient;
 	public static final String VERSION = "/api/0.5";
 	private final ExecutorService pool;
 
-	public UCEngine(String url) throws IOReactorException {
-		this.ucengineUrl = url;
+	public UCEngine(String zurl) throws MalformedURLException {
+		URL url = new URL(zurl);
+		this.host = url.getHost();
+		this.port = url.getPort();
+		this.protocol = url.getProtocol();
 		this.httpclient = new DefaultHttpClient();
-		this.asyncHttpclient= new DefaultHttpAsyncClient();
-		this.asyncHttpclient.start();
 		this.pool = Executors.newFixedThreadPool(15);
 	}
 
-	public void executeAsync(HttpMethod method, final String path,
-			final FutureCallback<Response> future, List<NameValuePair> qparams, List<NameValuePair> body) throws InterruptedException {
-		asyncHttpclient.execute(buildRequest(method, path, qparams, null),
-				new FutureCallback<HttpResponse>() {
-					public void completed(final HttpResponse response) {
-						try {
-							future.completed(buildResponse(response));
-						} catch (IOException e) {
-							future.failed(e);
-						}
-					}
-					public void failed(final Exception ex) {
-						future.failed(ex);
-					}
-					public void cancelled() {
-						future.cancelled();
-					}
-				});
-	}
-	
-	protected HttpRequestBase buildRequest(HttpMethod method, String path, List<NameValuePair> qparams, HttpParams params) {
-		StringBuilder url = new StringBuilder(this.ucengineUrl).append(VERSION).append(path);
-		if(qparams != null) {
-			url.append('?').append(URLEncodedUtils.format(qparams, "UTF-8"));
-		}
-		HttpRequestBase base = null;
-		if(method.equals(HttpMethod.GET)) {
-			base = new HttpGet(url.toString());
-		}
-		if(method.equals(HttpMethod.POST)) {
-			base = new HttpPost(url.toString());
-		}
-		if(params != null) {
-			base.setParams(params);
-		}
-		return base;
-	}
-	
-	private static Response buildResponse(HttpResponse response) throws IOException {
+	private static Response buildResponse(HttpResponse response) throws UceException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(new Long(response.getEntity().getContentLength()).intValue());
-		response.getEntity().writeTo(buffer);
-		return new Response(response.getStatusLine().getStatusCode(), buffer.toByteArray());
-	}
-	
-	public Response execute(HttpMethod method, String path, List<NameValuePair> qparams, List<NameValuePair> formparams) throws ClientProtocolException, IOException {
-		HttpRequestBase request = buildRequest(method, path, qparams, null);
-		if(formparams != null) {
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
-			((HttpPost)request).setEntity(entity);
+		try {
+			response.getEntity().writeTo(buffer);
+		} catch (IOException e) {
+			throw new UceException();
 		}
-		return execute(request);
+		Response uceResponse = new Response(response.getStatusLine().getStatusCode(), buffer.toByteArray()); 
+		if(response.getStatusLine().getStatusCode() >= 300) {
+			throw new UceException(uceResponse.getValues().getString("error"));
+		}
+		return uceResponse;
 	}
 	
-	public Response execute(HttpRequestBase request) throws ClientProtocolException, IOException {
-		HttpResponse response = httpclient.execute(request);
-		return buildResponse(response);
+	public URI uri(String path, String query) throws URISyntaxException {
+		return URIUtils.createURI(this.protocol, this.host, this.port, VERSION + path, query, null);
+	}
+	
+	public URI uri(String path) throws URISyntaxException {
+		return URIUtils.createURI(this.protocol, this.host, this.port, VERSION + path, null, null);
+	}
+	
+	public URI uri(String path, List<NameValuePair> qparams) throws URISyntaxException {
+		return uri(path, URLEncodedUtils.format(qparams, "UTF-8"));
+	}
+		
+	public Response get(String path, List<NameValuePair> qparams) throws HttpException, UceException {
+		return get(path, URLEncodedUtils.format(qparams, "UTF-8"));
 	}
 
-	public void shutdown() throws InterruptedException {
-		asyncHttpclient.shutdown();
+	public Response get(String path, String query) throws HttpException, UceException {
+		try {
+			return execute(new HttpGet(uri(path, query)));
+		} catch (URISyntaxException e) {
+			throw new HttpException(e);
+		}
+	}
+
+	public Response get(String path) throws HttpException, UceException {
+		try {
+			return execute(new HttpGet(uri(path)));
+		} catch (URISyntaxException e) {
+			throw new HttpException(e);
+		}
+	}
+
+	public Response post(String path, List<NameValuePair> params) throws HttpException, UceException {
+		HttpPost post;
+		try {
+			System.out.println(uri(path));
+			post = new HttpPost(uri(path));
+		} catch (URISyntaxException e) {
+			throw new HttpException(e);
+		}
+		try {
+			post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new HttpException(e);
+		}
+		return execute(post);
+	}
+
+	public Response execute(HttpRequestBase request) throws UceException, HttpException {
+		HttpResponse response;
+		try {
+			response = httpclient.execute(request);
+		} catch (ClientProtocolException e) {
+			throw new HttpException(e);
+		} catch (IOException e) {
+			throw new HttpException(e);
+		}
+		return buildResponse(response);
 	}
 
 	/**
@@ -115,4 +132,28 @@ public class UCEngine {
 		return pool;
 	}
 
+	public Session connection(String name, String credential) throws HttpException, UceException {
+		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+		formparams.add(new BasicNameValuePair("name", name));
+		formparams.add(new BasicNameValuePair("credential", credential));
+		Response response = post("/presence/", formparams);
+		JSONObject result = response.getValues().getJSONObject("result");
+		return new Session(this, result.getString("uid"), result.getString("sid"));
+	}
+	
+	public UserSession connection(User user, String credential) throws HttpException, UceException {
+		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+		formparams.add(new BasicNameValuePair("name", user.getName()));
+		formparams.add(new BasicNameValuePair("credential", credential));
+		formparams.add(new BasicNameValuePair("metadata[nickname]", user.getName()));
+		Response response = post("/presence/", formparams);
+		JSONObject result = response.getValues().getJSONObject("result");
+		System.out.println(result);
+		return new UserSession(this, result.getString("uid"), result.getString("sid"));
+	}
+
+	public Date time() throws HttpException, UceException {
+		Response response = this.get("/time");
+		return new Date(response.getValues().getLong("result"));
+	}
 }

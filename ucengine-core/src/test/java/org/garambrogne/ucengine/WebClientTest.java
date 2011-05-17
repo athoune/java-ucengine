@@ -3,20 +3,11 @@
  */
 package org.garambrogne.ucengine;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.concurrent.CountDownLatch;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.nio.concurrent.FutureCallback;
-import org.apache.http.nio.reactor.IOReactorException;
 import org.garambrogne.ucengine.event.Event;
 import org.garambrogne.ucengine.event.EventHandler;
-import org.garambrogne.ucengine.rpc.HttpMethod;
-import org.garambrogne.ucengine.rpc.Response;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * @author mlecarme
@@ -25,71 +16,35 @@ import static org.junit.Assert.*;
 public class WebClientTest {
 
 	@Test
-	public void time() throws URISyntaxException, IOReactorException, MalformedURLException, InterruptedException {
+	public void time() throws MalformedURLException, HttpException, UceException {
 		UCEngine client = new UCEngine("http://demo.ucengine.org");
-		final CountDownLatch latch = new CountDownLatch(2);
-		client.executeAsync(HttpMethod.GET, "/time", new FutureCallback<Response>() {
-			public void failed(Exception e) {
-				e.printStackTrace();
-				assertTrue(false);
-				latch.countDown();
-			}
-			public void completed(Response response) {
-				latch.countDown();
-				assertFalse(response.isError());
-				assertTrue(200 == response.getStatus());
-				System.out.println(response.getValues());
-			}
-			public void cancelled() {
-				assertTrue(false);
-				latch.countDown();
-			}
-		}, null, null);
-		client.executeAsync(HttpMethod.GET, "/infos", new FutureCallback<Response>() {
-			public void failed(Exception e) {
-				assertTrue(false);
-				e.printStackTrace();
-				latch.countDown();
-			}
-			public void completed(Response response) {
-				latch.countDown();
-				assertTrue(response.isError());
-				assertTrue(400 == response.getStatus());
-				System.out.println(response.getValues());
-			}
-			public void cancelled() {
-				assertTrue(false);
-				latch.countDown();
-			}
-		}, null, null);
-		latch.await();
-		client.shutdown();
+		System.out.println(client.time());
 	}
 	
 	@Test
-	public void demo() throws ClientProtocolException, IOException {
+	public void demo() throws MalformedURLException, HttpException, UceException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
 		final User demo = new User("victor.goya@af83.com");
-		demo.register("internal.presence.add", new EventHandler() {
+		final UserSession session = engine.connection(demo, "pwd");
+		session.register("internal.presence.add", new EventHandler() {
 			public void handle(Event event) {
+				System.out.println("I'll stop");
+				System.out.println(event.getRaw());
 				try {
-					System.out.println("I'll stop");
-					System.out.println(event.getRaw());
-					demo.shutdown();
+					session.shutdown();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
-		demo.connect(engine, "pwd").presence();	
+		session.presence();	
 	}
 	
 	@Test
-	public void infos() throws ClientProtocolException, IOException, InterruptedException {
+	public void infos() throws HttpException, MalformedURLException, UceException {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
-		final User demo = new User("victor.goya@af83.com");
-		demo.connect(engine, "pwd");
-		System.out.println(demo.infos());
+		final User victor = new User("victor.goya@af83.com");
+		System.out.println(engine.connection(victor, "pwd").infos());
 	}
 }
