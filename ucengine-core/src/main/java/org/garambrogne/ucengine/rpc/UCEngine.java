@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.garambrogne.ucengine;
+package org.garambrogne.ucengine.rpc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,7 +31,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
-import org.garambrogne.ucengine.rpc.Response;
+import org.garambrogne.ucengine.event.Connectable;
 
 /**
  * @author mlecarme
@@ -118,8 +120,10 @@ public class UCEngine {
 		try {
 			response = httpclient.execute(request);
 		} catch (ClientProtocolException e) {
+			System.out.println(e.getStackTrace());
 			throw new HttpException(e);
 		} catch (IOException e) {
+			System.out.println(e.getStackTrace());
 			throw new HttpException(e);
 		}
 		return buildResponse(response);
@@ -132,24 +136,24 @@ public class UCEngine {
 		return pool;
 	}
 
-	public Session connection(String name, String credential) throws HttpException, UceException {
+	public Session connection(Connectable connectable, String credential) throws HttpException, UceException {
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-		formparams.add(new BasicNameValuePair("name", name));
+		formparams.add(new BasicNameValuePair("name", connectable.getName()));
 		formparams.add(new BasicNameValuePair("credential", credential));
+		Map<String, Object> meta = connectable.metaDataOnConnection();
+		if(meta != null) {
+			for (Entry<String, Object> entry : meta.entrySet()) {
+				formparams.add(new BasicNameValuePair(new StringBuffer("metadata[").append(entry.getKey()).append("]").toString(), entry.getValue().toString()));
+			}
+		}
 		Response response = post("/presence/", formparams);
 		JSONObject result = response.getValues().getJSONObject("result");
-		return new Session(this, result.getString("uid"), result.getString("sid"));
-	}
-	
-	public UserSession connection(User user, String credential) throws HttpException, UceException {
-		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-		formparams.add(new BasicNameValuePair("name", user.getName()));
-		formparams.add(new BasicNameValuePair("credential", credential));
-		formparams.add(new BasicNameValuePair("metadata[nickname]", user.getName()));
-		Response response = post("/presence/", formparams);
-		JSONObject result = response.getValues().getJSONObject("result");
-		System.out.println(result);
-		return new UserSession(this, result.getString("uid"), result.getString("sid"));
+		connectable.setUid(result.getString("uid"));
+		connectable.setSid(result.getString("sid"));
+		connectable.setEngine(this);
+		Session session = new Session(this, result.getString("uid"), result.getString("sid"));
+		session.getLoop().register(connectable);
+		return session;
 	}
 
 	public Date time() throws HttpException, UceException {

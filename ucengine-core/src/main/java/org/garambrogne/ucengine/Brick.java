@@ -11,15 +11,15 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.tapestry5.json.JSONObject;
-import org.garambrogne.ucengine.event.Eventualy;
-import org.garambrogne.ucengine.rpc.HttpMethod;
+import org.garambrogne.ucengine.event.Connectable;
+import org.garambrogne.ucengine.event.Eventable;
+import org.garambrogne.ucengine.rpc.UCEngine;
 
 /**
  * @author mlecarme
  * Distant plugin
  */
-public abstract class Brick extends Eventualy {
+public abstract class Brick extends Connectable implements Eventable {
 	
 	private String uid;
 
@@ -37,7 +37,7 @@ public abstract class Brick extends Eventualy {
 	public void suscribe(String location, int start) {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		qparams.add(new BasicNameValuePair("uid", this.uid));
-		qparams.add(new BasicNameValuePair("sid", this.sid));
+		//qparams.add(new BasicNameValuePair("sid", this.sid));
 		qparams.add(new BasicNameValuePair("_async", "lp"));
 		//this.startLoop(engine.buildRequest(HttpMethod.GET, "/event", qparams, null));
 	}
