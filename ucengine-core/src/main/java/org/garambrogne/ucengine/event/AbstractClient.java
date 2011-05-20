@@ -17,9 +17,11 @@ import org.garambrogne.ucengine.rpc.UCEngine;
 public abstract class AbstractClient implements Connectable, ActionAble {
 	protected UCEngine engine;
 	protected Log log = LogFactory.getLog(this.getClass());
-	protected String uid, sid;
+	protected String uid, sid, name;
 	
-	public abstract String getName();
+	public AbstractClient(String name) {
+		this.name = name;
+	}
 
 	public Map<String, Object> metaDataOnConnection() {
 		return null;
@@ -35,6 +37,14 @@ public abstract class AbstractClient implements Connectable, ActionAble {
 
 	public UCEngine getEngine() {
 		return engine;
+	}
+	
+	public void setEngine(UCEngine engine) {
+		this.engine = engine;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }

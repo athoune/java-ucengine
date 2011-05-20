@@ -16,7 +16,6 @@ import org.garambrogne.ucengine.event.Eventable;
 import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.HttpException;
 import org.garambrogne.ucengine.rpc.Meta;
-import org.garambrogne.ucengine.rpc.UCEngine;
 import org.garambrogne.ucengine.rpc.UceException;
 
 
@@ -26,23 +25,23 @@ import org.garambrogne.ucengine.rpc.UceException;
  *
  */
 public class User extends AbstractClient implements Eventable, ActionAble, Connectable {
-	private String name;
+
 	public User(String name) {
-		this.name = name;
+		super(name);
 	}
+
 	@Meta("nickname")
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
-		this.name = name;
-	}
+
 	@Override
 	public Map<String, Object> metaDataOnConnection() {
 		Map<String, Object> meta = new HashMap<String, Object>();
 		meta.put("nickname", getName());
 		return meta;
 	}
+
 	@Override
 	public String eventPath() {
 		return "/event";
@@ -53,9 +52,5 @@ public class User extends AbstractClient implements Eventable, ActionAble, Conne
 		qparams.add(new BasicNameValuePair("uid", this.uid));
 		qparams.add(new BasicNameValuePair("sid", this.sid));
 		engine.get("/event", qparams);
-	}
-	@Override
-	public void setEngine(UCEngine engine) {
-		this.engine = engine;
 	}
 }
