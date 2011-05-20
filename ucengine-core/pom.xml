@@ -10,7 +10,6 @@
 	</parent>
 
 	<artifactId>ucengine-core</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<developers>
@@ -24,8 +23,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.5</maven.compiler.source>
-		<maven.compiler.target>1.5</maven.compiler.target>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 
 	<repositories>
@@ -67,5 +66,4 @@
 			<optional>false</optional>
 		</dependency>
 	</dependencies>
-	<groupId>org.garambrogne</groupId>
 </project>
