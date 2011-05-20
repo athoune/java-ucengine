@@ -10,7 +10,7 @@ import org.garambrogne.ucengine.rpc.UCEngine;
 
 /**
  * @author mlecarme
- * Abstract object that can be connected
+ * Can be connected
  * @see Eventualy
  */
 public interface Connectable {

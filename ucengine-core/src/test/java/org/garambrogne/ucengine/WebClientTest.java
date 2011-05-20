@@ -19,8 +19,8 @@ public class WebClientTest {
 
 	@Test
 	public void time() throws MalformedURLException, HttpException, UceException {
-		UCEngine client = new UCEngine("http://demo.ucengine.org");
-		System.out.println(client.time());
+		UCEngine engine = new UCEngine("http://demo.ucengine.org");
+		System.out.println(engine.time());
 	}
 	
 	@Test
