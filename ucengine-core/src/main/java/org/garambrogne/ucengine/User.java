@@ -10,10 +10,12 @@ import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.garambrogne.ucengine.event.AbstractConnection;
 import org.garambrogne.ucengine.event.Connectable;
 import org.garambrogne.ucengine.event.Eventable;
 import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.HttpException;
+import org.garambrogne.ucengine.rpc.Meta;
 import org.garambrogne.ucengine.rpc.UCEngine;
 import org.garambrogne.ucengine.rpc.UceException;
 
@@ -23,11 +25,12 @@ import org.garambrogne.ucengine.rpc.UceException;
  * @author mlecarme
  *
  */
-public class User extends Connectable implements Eventable, ActionAble {
+public class User extends AbstractConnection implements Eventable, ActionAble, Connectable {
 	private String name;
 	public User(String name) {
 		this.name = name;
 	}
+	@Meta("nickname")
 	public String getName() {
 		return name;
 	}
