@@ -8,30 +8,30 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.garambrogne.ucengine.Brick;
 import org.garambrogne.ucengine.event.Event;
-import org.garambrogne.ucengine.event.EventHandler;
+import org.garambrogne.ucengine.event.On;
 
 /**
  * @author mlecarme
  *
  */
 public class IndexingBrick extends Brick {
-	
-	public IndexingBrick() {
+	final Client client;
+	public IndexingBrick(String name) {
+		super(name);
 		Node node;
 		node = NodeBuilder.nodeBuilder().node();
 		node.start();
-		final Client client = node.client();
-		this.register("internal.presence.add", new EventHandler() {
-			public void handle(Event event) {
-				client.prepareIndex("ucengine", "internal.presence.add")
-					.setSource(event.getRaw().toString())
-					.execute();
-			}
-		});
+		this.client = node.client();
+	}
+	
+	@On("internal.presence.add")
+	public void handlePresenceAdd(Event event) {
+		client.prepareIndex("ucengine", "internal.presence.add")
+		.setSource(event.getRaw().toString())
+		.execute();
 	}
 	
 	public void suscribe() {
-		this.suscribe("internal.presence.add");
+		//this.suscribe("internal.presence.add");
 	}
-
 }
