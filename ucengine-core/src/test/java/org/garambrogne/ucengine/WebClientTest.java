@@ -28,7 +28,7 @@ public class WebClientTest {
 		UCEngine engine = new UCEngine("http://demo.ucengine.org");
 		final User victor = new SimpleUser("victor.goya@af83.com");
 		final Session session = engine.connection(victor, "pwd");
-		session.startLoop();
+		session.listenAllEvents();
 		victor.presence();	
 	}
 	

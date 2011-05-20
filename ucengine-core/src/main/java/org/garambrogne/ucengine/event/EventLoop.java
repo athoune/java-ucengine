@@ -5,6 +5,7 @@ package org.garambrogne.ucengine.event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +13,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.rpc.HttpException;
 import org.garambrogne.ucengine.rpc.Response;
-import org.garambrogne.ucengine.rpc.UCEngine;
+import org.garambrogne.ucengine.rpc.Session;
 import org.garambrogne.ucengine.rpc.UceException;
 
 /**
@@ -24,14 +28,14 @@ import org.garambrogne.ucengine.rpc.UceException;
  *
  */
 public class EventLoop {
-	private UCEngine engine;
+	private Session session;
 	protected Log log = LogFactory.getLog(this.getClass());
 	private Thread eventThread;
 	private boolean running = true;
 	private Map<String, List<EventHandler>> handlers = new HashMap<String, List<EventHandler>>();
 	
-	public EventLoop(UCEngine engine) {
-		this.engine = engine;
+	public EventLoop(Session session) {
+		this.session = session;
 	}
 	
 	public void register(final Object object) {
@@ -63,34 +67,50 @@ public class EventLoop {
 		}
 	}
 
-	public void startLoop(final HttpRequestBase request) {
-		eventThread = new Thread(new Runnable() {
-			public void run() {
-				int start = 0;
-				while(running) {
-					Response response = null;
-					try {
-						request.getParams().setIntParameter("start", start);
-						System.out.println(request);
-						response = engine.execute(request);
-					} catch (UceException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (HttpException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					if(response != null){// && response.getStatus() == 200) {
-						for (Object event : response.getValues().getJSONArray("result")) {
-							JSONObject jevent = (JSONObject)event;
-							start = jevent.getInt("datetime") + 1;
-							trigger(new Event(jevent));
+	public void start(String path) throws HttpException {
+		start(path, null);
+	}
+
+	public void start(String path, String type) throws HttpException {
+		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+		qparams.add(new BasicNameValuePair("uid", this.session.getUid()));
+		qparams.add(new BasicNameValuePair("sid", this.session.getSid()));
+		qparams.add(new BasicNameValuePair("_async", "lp"));
+		if(type != null) {
+			qparams.add(new BasicNameValuePair("type", type));
+		}
+		try {
+			final HttpRequestBase request = new HttpGet(session.getEngine().uri("/event", qparams));
+			eventThread = new Thread(new Runnable() {
+				public void run() {
+					int start = 0;
+					while(running) {
+						Response response = null;
+						try {
+							request.getParams().setIntParameter("start", start);
+							System.out.println(request);
+							response = session.getEngine().execute(request);
+						} catch (UceException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (HttpException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
+						if(response != null){// && response.getStatus() == 200) {
+							for (Object event : response.getValues().getJSONArray("result")) {
+								JSONObject jevent = (JSONObject)event;
+								start = jevent.getInt("datetime") + 1;
+								trigger(new Event(jevent));
+							}
+						}
+
 					}
-					
 				}
-			}
-		});
+			});
+		} catch (URISyntaxException e) {
+			throw new HttpException(e);
+		}
 		eventThread.start();
 		System.out.println("Event loop started");
 	}
@@ -117,7 +137,7 @@ public class EventLoop {
 		if(handlers.containsKey(event.getType())) {
 			System.out.println("got event!");
 			for (EventHandler handler : handlers.get(event.getType())) {
-				engine.getPool().execute(new Handler(handler, event));
+				session.getEngine().getPool().execute(new Handler(handler, event));
 			}
 		}
 	}

@@ -3,12 +3,10 @@
  */
 package org.garambrogne.ucengine.rpc;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.event.EventLoop;
@@ -22,6 +20,12 @@ public class Session {
 	private UCEngine engine;
 	private EventLoop loop;
 	
+	public String getUid() {
+		return uid;
+	}
+	public String getSid() {
+		return sid;
+	}
 	public EventLoop getLoop() {
 		return loop;
 	}
@@ -29,7 +33,7 @@ public class Session {
 		this.engine = engine;
 		this.uid = uid;
 		this.sid = sid;
-		this.loop = new EventLoop(engine);
+		this.loop = new EventLoop(this);
 	}
 	public JSONObject infos() throws HttpException, UceException {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
@@ -40,16 +44,11 @@ public class Session {
 		return response.getValues().getJSONObject("result");
 	}
 	
-	public void startLoop() throws HttpException {
-		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		qparams.add(new BasicNameValuePair("uid", this.uid));
-		qparams.add(new BasicNameValuePair("sid", this.sid));
-		qparams.add(new BasicNameValuePair("_async", "lp"));
-		try {
-			loop.startLoop(new HttpGet(engine.uri("/event", qparams)));
-		} catch (URISyntaxException e) {
-			throw new HttpException(e);
-		}
+	public UCEngine getEngine() {
+		return engine;
+	}
+	public void listenAllEvents() throws HttpException {
+		loop.start("/event");
 	}
 
 }
