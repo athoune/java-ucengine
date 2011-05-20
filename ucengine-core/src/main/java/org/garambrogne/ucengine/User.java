@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.garambrogne.ucengine.event.AbstractConnection;
+import org.garambrogne.ucengine.event.AbstractClient;
 import org.garambrogne.ucengine.event.Connectable;
 import org.garambrogne.ucengine.event.Eventable;
 import org.garambrogne.ucengine.rpc.ActionAble;
@@ -25,7 +25,7 @@ import org.garambrogne.ucengine.rpc.UceException;
  * @author mlecarme
  *
  */
-public class User extends AbstractConnection implements Eventable, ActionAble, Connectable {
+public class User extends AbstractClient implements Eventable, ActionAble, Connectable {
 	private String name;
 	public User(String name) {
 		this.name = name;

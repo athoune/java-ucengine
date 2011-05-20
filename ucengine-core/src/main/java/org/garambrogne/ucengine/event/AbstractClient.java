@@ -7,13 +7,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.UCEngine;
 
 /**
  * @author mlecarme
  *
  */
-public abstract class AbstractConnection implements Connectable {
+public abstract class AbstractClient implements Connectable, ActionAble {
 	protected UCEngine engine;
 	protected Log log = LogFactory.getLog(this.getClass());
 	protected String uid, sid;
@@ -31,4 +32,9 @@ public abstract class AbstractConnection implements Connectable {
 	public void setSid(String sid) {
 		this.sid = sid;
 	}
+
+	public UCEngine getEngine() {
+		return engine;
+	}
+	
 }
