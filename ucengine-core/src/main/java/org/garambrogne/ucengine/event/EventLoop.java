@@ -91,7 +91,7 @@ public class EventLoop {
 				}
 			}
 		});
-		eventThread.run();
+		eventThread.start();
 		System.out.println("Event loop started");
 	}
 	
