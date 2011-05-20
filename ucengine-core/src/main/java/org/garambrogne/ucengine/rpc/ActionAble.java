@@ -5,8 +5,8 @@ package org.garambrogne.ucengine.rpc;
 
 /**
  * @author mlecarme
- *
+ * Can send action to the server
  */
 public interface ActionAble {
-	public void setEngine(UCEngine engine);
+	public UCEngine getEngine();
 }
