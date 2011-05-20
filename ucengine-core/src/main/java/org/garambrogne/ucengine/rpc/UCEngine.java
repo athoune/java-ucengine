@@ -18,6 +18,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -28,8 +31,19 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.event.Connectable;
 
@@ -49,8 +63,47 @@ public class UCEngine {
 		this.host = url.getHost();
 		this.port = url.getPort();
 		this.protocol = url.getProtocol();
-		this.httpclient = new DefaultHttpClient();
 		this.pool = Executors.newFixedThreadPool(15);
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(
+		         new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		schemeRegistry.register(
+		         new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(schemeRegistry);
+		// Increase max total connection to 200
+		cm.setMaxTotal(200);
+		// Increase default max connection per route to 20
+		cm.setDefaultMaxPerRoute(20);
+		this.httpclient = new DefaultHttpClient(cm);
+		((AbstractHttpClient) httpclient).setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+
+		    public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+		        // Honor 'keep-alive' header
+		        HeaderElementIterator it = new BasicHeaderElementIterator(
+		                response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+		        while (it.hasNext()) {
+		            HeaderElement he = it.nextElement();
+		            String param = he.getName(); 
+		            String value = he.getValue();
+		            if (value != null && param.equalsIgnoreCase("timeout")) {
+		                try {
+		                    return Long.parseLong(value) * 1000;
+		                } catch(NumberFormatException ignore) {
+		                }
+		            }
+		        }
+		        HttpHost target = (HttpHost) context.getAttribute(
+		                ExecutionContext.HTTP_TARGET_HOST);
+		        if ("www.naughty-server.com".equalsIgnoreCase(target.getHostName())) {
+		            // Keep alive for 5 seconds only
+		            return 5 * 1000;
+		        } else {
+		            // otherwise keep alive for 30 seconds
+		            return 30 * 1000;
+		        }
+		    }
+		    
+		});
 	}
 
 	private static Response buildResponse(HttpResponse response) throws UceException {
@@ -120,10 +173,8 @@ public class UCEngine {
 		try {
 			response = httpclient.execute(request);
 		} catch (ClientProtocolException e) {
-			System.out.println(e.getStackTrace());
 			throw new HttpException(e);
 		} catch (IOException e) {
-			System.out.println(e.getStackTrace());
 			throw new HttpException(e);
 		}
 		return buildResponse(response);
