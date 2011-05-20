@@ -106,6 +106,13 @@ public class UCEngine {
 		});
 	}
 
+	public static List<NameValuePair> buildArguments(String uid, String sid) {
+		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+		qparams.add(new BasicNameValuePair("uid", uid));
+		qparams.add(new BasicNameValuePair("sid", sid));
+		return qparams;
+	}
+	
 	private static Response buildResponse(HttpResponse response) throws UceException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(new Long(response.getEntity().getContentLength()).intValue());
 		try {

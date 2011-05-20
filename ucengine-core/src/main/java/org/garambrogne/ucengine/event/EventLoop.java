@@ -21,6 +21,7 @@ import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.rpc.HttpException;
 import org.garambrogne.ucengine.rpc.Response;
 import org.garambrogne.ucengine.rpc.Session;
+import org.garambrogne.ucengine.rpc.UCEngine;
 import org.garambrogne.ucengine.rpc.UceException;
 
 /**
@@ -72,9 +73,7 @@ public class EventLoop {
 	}
 
 	public void start(String path, String type) throws HttpException {
-		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		qparams.add(new BasicNameValuePair("uid", this.session.getUid()));
-		qparams.add(new BasicNameValuePair("sid", this.session.getSid()));
+		List<NameValuePair> qparams = UCEngine.buildArguments(this.session.getUid(), this.session.getSid());
 		qparams.add(new BasicNameValuePair("_async", "lp"));
 		if(type != null) {
 			qparams.add(new BasicNameValuePair("type", type));
