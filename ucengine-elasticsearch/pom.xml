@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.garambrogne</groupId>
 		<artifactId>ucengine</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2</version>
 		<relativePath>../</relativePath>
 	</parent>
 
 	<groupId>org.garambrogne</groupId>
 	<artifactId>ucengine-elasticsearch</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 
 	<developers>
@@ -43,7 +43,7 @@
 		<dependency>
 		      <groupId>org.garambrogne</groupId>
 		      <artifactId>ucengine-core</artifactId>
-		      <version>0.0.1-SNAPSHOT</version>
+		      <version>0.0.2</version>
 		    </dependency>
 		<dependency>
 			<groupId>junit</groupId>
