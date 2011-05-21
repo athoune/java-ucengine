@@ -208,9 +208,9 @@ public class UCEngine {
 		JSONObject result = response.getValues().getJSONObject("result");
 		connectable.setUid(result.getString("uid"));
 		connectable.setSid(result.getString("sid"));
-		connectable.setEngine(this);
 		Session session = new Session(this, result.getString("uid"), result.getString("sid"));
 		session.getLoop().register(connectable);
+		connectable.setSession(session);
 		return session;
 	}
 

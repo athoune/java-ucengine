@@ -45,6 +45,6 @@ public class User extends AbstractClient implements Eventable, ActionAble, Conne
 	}
 	
 	public void presence() throws HttpException, UceException {
-		engine.get("/event", UCEngine.buildArguments(uid, sid));
+		getSession().getEngine().get("/event", UCEngine.buildArguments(uid, sid));
 	}
 }

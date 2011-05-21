@@ -21,7 +21,11 @@ public class Brick extends AbstractClient implements Eventable, Connectable, Act
 	@Override
 	public String eventPath() {
 		// TODO Auto-generated method stub
-		return null;
+		return "/event";
+	}
+	
+	public void listenEvent(String event) {
+	
 	}
 	
 }

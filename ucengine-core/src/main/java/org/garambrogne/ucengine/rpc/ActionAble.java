@@ -8,5 +8,5 @@ package org.garambrogne.ucengine.rpc;
  * Can send action to the server
  */
 public interface ActionAble {
-	public UCEngine getEngine();
+	public Session getSession();
 }
