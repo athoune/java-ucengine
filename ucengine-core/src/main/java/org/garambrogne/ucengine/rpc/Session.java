@@ -50,5 +50,15 @@ public class Session {
 	public void listenAllEvents() throws HttpException {
 		loop.start("/event");
 	}
+	
+	public Response GET(String path) throws HttpException, UceException {
+		return GET(path, new Arguments());
+	}
+	
+	public Response GET(String path, Arguments arguments) throws HttpException, UceException {
+		arguments.add("uid", getUid());
+		arguments.add("sid", getSid());
+		return engine.get(path, arguments.values());
+	}
 
 }

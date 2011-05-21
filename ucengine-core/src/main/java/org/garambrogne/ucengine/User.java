@@ -12,7 +12,6 @@ import org.garambrogne.ucengine.event.Eventable;
 import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.HttpException;
 import org.garambrogne.ucengine.rpc.Meta;
-import org.garambrogne.ucengine.rpc.UCEngine;
 import org.garambrogne.ucengine.rpc.UceException;
 
 
@@ -45,6 +44,6 @@ public class User extends AbstractClient implements Eventable, ActionAble, Conne
 	}
 	
 	public void presence() throws HttpException, UceException {
-		getSession().getEngine().get("/event", UCEngine.buildArguments(uid, sid));
+		getSession().GET("/event");
 	}
 }
