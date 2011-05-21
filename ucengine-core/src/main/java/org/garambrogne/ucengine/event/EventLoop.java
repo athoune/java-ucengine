@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +33,7 @@ public class EventLoop {
 	private Session session;
 	protected Log log = LogFactory.getLog(this.getClass());
 	private Thread eventThread;
-	private boolean running = true;
+	private AtomicBoolean running = new AtomicBoolean(true);
 	private Map<String, List<EventHandler>> handlers = new HashMap<String, List<EventHandler>>();
 	
 	public EventLoop(Session session) {
@@ -83,7 +84,7 @@ public class EventLoop {
 			eventThread = new Thread(new Runnable() {
 				public void run() {
 					int start = 0;
-					while(running) {
+					while(running.get()) {
 						Response response = null;
 						try {
 							request.getParams().setIntParameter("start", start);
@@ -128,7 +129,7 @@ public class EventLoop {
 				try {
 					handler.handle(event);
 				} catch (Throwable e) {
-					running = false;
+					running.set(false);
 				}
 			}
 		}
@@ -142,6 +143,6 @@ public class EventLoop {
 	}
 	
 	public void stop() {
-		running = false;
+		running.set(false);
 	}
 }
