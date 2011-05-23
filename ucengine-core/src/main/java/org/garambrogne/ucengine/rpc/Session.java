@@ -10,6 +10,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.tapestry5.json.JSONObject;
 import org.garambrogne.ucengine.event.EventLoop;
+import org.garambrogne.ucengine.event.impl.ThreadEventLoop;
 
 /**
  * @author mlecarme
@@ -33,7 +34,7 @@ public class Session {
 		this.engine = engine;
 		this.uid = uid;
 		this.sid = sid;
-		this.loop = new EventLoop(this);
+		this.loop = new ThreadEventLoop(this);
 	}
 	public JSONObject infos() throws HttpException, UceException {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();

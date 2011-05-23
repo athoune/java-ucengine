@@ -6,9 +6,9 @@ package org.garambrogne.ucengine;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.garambrogne.ucengine.event.AbstractClient;
 import org.garambrogne.ucengine.event.Connectable;
 import org.garambrogne.ucengine.event.Eventable;
+import org.garambrogne.ucengine.event.impl.AbstractClient;
 import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.HttpException;
 import org.garambrogne.ucengine.rpc.Meta;

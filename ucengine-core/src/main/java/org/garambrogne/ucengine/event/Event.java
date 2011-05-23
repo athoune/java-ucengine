@@ -22,7 +22,7 @@ public class Event {
 	private Map<String, Object> metadata = null;
 	private JSONObject raw;
 
-	protected Event(JSONObject data) {
+	public Event(JSONObject data) {
 		raw = data;
 		id = data.getString("id");
 		domain = data.getString("domain");

@@ -1,12 +1,13 @@
 /**
  * 
  */
-package org.garambrogne.ucengine.event;
+package org.garambrogne.ucengine.event.impl;
 
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.garambrogne.ucengine.event.Connectable;
 import org.garambrogne.ucengine.rpc.ActionAble;
 import org.garambrogne.ucengine.rpc.Session;
 

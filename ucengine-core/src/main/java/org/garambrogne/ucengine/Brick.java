@@ -3,9 +3,9 @@
  */
 package org.garambrogne.ucengine;
 
-import org.garambrogne.ucengine.event.AbstractClient;
 import org.garambrogne.ucengine.event.Connectable;
 import org.garambrogne.ucengine.event.Eventable;
+import org.garambrogne.ucengine.event.impl.AbstractClient;
 import org.garambrogne.ucengine.rpc.ActionAble;
 
 /**
